@@ -1,0 +1,56 @@
+{
+    "variables": {
+      "build_number": "{{timestamp}}",
+      "os_arch": "x86_64",
+      "os_version": "7",
+      "os_major_release": "9",
+      "os_minor_release": "2009",
+      "iso_url": "http://mirror.cs.vt.edu/pub/CentOS/{{ user `os_version` }}.{{ user `os_major_release` }}.{{ user `os_minor_release` }}/isos/{{ user `os_arch` }}/CentOS-{{ user `os_version` }}-{{ user `os_arch` }}-Everything-{{ user `os_minor_release` }}.iso",
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "689531cce9cf484378481ae762fae362791a9be078fda10e4f6977bf8fa71350",
+      "ssh_username": "root",
+      "ssh_password": "{{ env `PACKER_SSH_PASSWORD` }}",
+      "timeout": "60m",
+      "headless": "true",
+      "http": "http",
+      "ks_file": "ks.cfg",
+      "disk_size": "22528",
+      "memory": "5120",
+      "cpus": "4"
+    },
+    "sensitive-variables": ["ssh_password"],
+    "builders": [
+      {
+        "name": "STIG-Base",
+        "type": "qemu",
+        "accelerator": "kvm",
+        "qemu_binary": "/usr/libexec/qemu-kvm",
+        "iso_url": "{{ user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum_type`}}:{{user `iso_checksum`}}",
+        "ssh_username": "{{user `ssh_username`}}",
+        "ssh_password": "{{ user `ssh_password` }}",
+        "ssh_timeout": "{{user `timeout`}}",        
+        "headless": "{{user `headless`}}",
+        "shutdown_command": "shutdown -P now",
+        "http_directory": "{{ user `http` }}",
+        "boot_command": [
+          "<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `ks_file`}}<enter><wait>"
+        ],
+        "disk_size": "{{ user `disk_size` }}",
+        "memory": "{{ user `memory` }}",
+        "cpus": "{{ user `cpus` }}",
+        "format": "raw",
+        "vnc_bind_address": "0.0.0.0",
+        "vnc_port_min": 5957,
+        "vnc_port_max": 5957
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "ansible",
+        "playbook_file": "ansible/stig_local.yml",
+        "roles_path": "ansible/roles",
+        "sftp_command": "/usr/libexec/openssh/sftp-server -e"
+      }
+    ]
+  }

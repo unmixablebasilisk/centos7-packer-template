@@ -1,0 +1,9 @@
+---
+- name: "Run STIG role"
+  hosts: default
+  become: true
+  roles:
+    - RHEL7-STIG
+    - cloud-enable
+  vars:
+   - rhel7stig_bootloader_password_hash: 'grub.pbkdf2.sha512.<hash>'

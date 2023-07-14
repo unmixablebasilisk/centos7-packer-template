@@ -1,0 +1,33 @@
+variables:
+  GIT_SSL_NO_VERIFY: "1"
+  GIT_STRATEGY: clone
+  DOCKER_REGISTRY: https://hub.docker.com
+  PACKER_VERSION: 1.8.5
+
+services:
+  - docker:dind
+
+stages:
+  - build-docker-image
+  - build-packer-image
+
+build-docker-image:
+  stage: build-docker-image
+  tags:
+    - docker
+  script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PW registry.example.com
+    - docker build -t $DOCKER_REGISTRY/<directory>/centos7:stig --build-arg PACKER_VERSION=$PACKER_VERSION ./docker
+    - docker push $DOCKER_REGISTRY/<directory>/centos7:stig
+
+build-packer-image:
+  stage: build-packer-image
+  image: $DOCKER_REGISTRY/harbor/stig-image-build:centos7
+  tags:
+    - docker
+  cache:
+    paths:
+      - packer_cache/*.iso
+  script:
+    - packer build centos7_ci.json
+    # - PACKER_LOG=1 packer build centos7_ci.json

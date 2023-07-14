@@ -1,0 +1,2 @@
+# For STIG Ansible playbook's grub2_hash filter plugin
+passlib >= 1.5

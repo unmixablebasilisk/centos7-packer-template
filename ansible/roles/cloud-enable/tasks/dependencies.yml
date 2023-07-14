@@ -1,0 +1,5 @@
+---
+- name: "Install cloud and fips packages"
+  yum:
+    name: ['acpid', 'cloud-init', 'cloud-utils-growpart', 'dracut-fips']
+    state: latest

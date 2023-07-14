@@ -1,0 +1,9 @@
+---
+
+- include: dependencies.yml
+
+- include: configure.yml
+
+- include: regenerate-boot.yml
+
+- include: cleanup.yml

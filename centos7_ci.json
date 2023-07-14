@@ -1,0 +1,77 @@
+{
+    "variables": {
+      "build_number": "{{timestamp}}",
+      "os_arch": "x86_64",
+      "os_version": "7",
+      "os_major_release": "9",
+      "os_minor_release": "2009",
+      "iso_url": "http://mirror.cs.vt.edu/pub/CentOS/{{ user `os_version` }}.{{ user `os_major_release` }}.{{ user `os_minor_release` }}/isos/{{ user `os_arch` }}/CentOS-{{ user `os_version` }}-{{ user `os_arch` }}-Everything-{{ user `os_minor_release` }}.iso",
+      "iso_checksum_type": "sha256",
+      "iso_checksum": "689531cce9cf484378481ae762fae362791a9be078fda10e4f6977bf8fa71350",
+      "ssh_username": "root",
+      "ssh_password": "{{ env `PACKER_SSH_PASSWORD` }}",
+      "timeout": "60m",
+      "headless": "true",
+      "http": "http",
+      "ks_file": "ks.cfg",
+      "disk_size": "22528",
+      "memory": "5120",
+      "cpus": "4",
+      "os_application_credential_secret": "{{ env `OS_APPLICATION_CREDENTIAL_SECRET` }}",
+      "os_application_credential_id": "{{ env `OS_APPLICATION_CREDENTIAL_ID` }}",
+      "os_auth_url": "{{ env `OS_AUTH_URL` }}",
+      "os_auth_type": "{{ env `OS_AUTH_TYPE` }}",
+      "os_identity_api_version": "{{ env `OS_IDENTITY_API_VERSION` }}",
+      "os_interface": "{{ env `OS_INTERFACE` }}",
+      "os_region_name": "{{ env `OS_REGION_NAME` }}",
+      "os_user_domain_name": "{{ env `OS_USER_DOMAIN_NAME` }}"
+    },
+    "sensitive-variables": ["ssh_password", "os_password"],
+    "builders": [
+      {
+        "name": "STIG-Base",
+        "type": "qemu",
+        "accelerator": "kvm",
+        "qemu_binary": "/usr/libexec/qemu-kvm",
+        "iso_url": "{{ user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum_type`}}:{{user `iso_checksum`}}",
+        "ssh_username": "{{user `ssh_username`}}",
+        "ssh_password": "{{ user `ssh_password` }}",
+        "ssh_timeout": "{{user `timeout`}}",        
+        "headless": "{{user `headless`}}",
+        "shutdown_command": "shutdown -P now",
+        "http_directory": "{{ user `http` }}",
+        "boot_command": [
+          "<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `ks_file`}}<enter><wait>"
+        ],
+        "disk_size": "{{ user `disk_size` }}",
+        "memory": "{{ user `memory` }}",
+        "cpus": "{{ user `cpus` }}",
+        "format": "raw"
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "ansible",
+        "playbook_file": "ansible/stig_ci.yml",
+        "roles_path": "ansible/roles",
+        "sftp_command": "/usr/libexec/openssh/sftp-server -e"
+      }
+    ],
+    "post-processors": [
+      {
+        "type": "shell-local",
+        "environment_vars": [
+          "OS_APPLICATION_CREDENTIAL_SECRET={{ user `os_application_credential_secret` }}",
+          "OS_APPLICATION_CREDENTIAL_ID={{ user `os_application_credential_id` }}",
+          "OS_AUTH_URL={{ user `os_auth_url` }}",
+          "OS_AUTH_TYPE={{ user `os_auth_type` }}",
+          "OS_IDENTITY_API_VERSION={{ user `os_identity_api_version` }}",
+          "OS_INTERFACE={{ user `os_interface` }}",
+          "OS_REGION_NAME={{ user `os_region_name` }}",
+          "OS_USER_DOMAIN_NAME={{ user `os_user_domain_name` }}"],
+        "inline": [
+          "openstack image create --insecure --private --disk-format raw --container-format bare --file output-STIG-Base/packer-STIG-Base CentOS{{ user `os_version` }}.{{ user `os_major_release` }}.{{ user `os_minor_release` }}-STIG-Base-DONT-USE-{{ replace_all \":\" \"-\" isotime }}"]
+      }
+    ]
+  }

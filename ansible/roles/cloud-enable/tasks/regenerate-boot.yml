@@ -1,0 +1,12 @@
+---
+- name: "Regenerate the initramfs file"
+  shell: dracut -v -f
+
+- name: "Include console and fips flags in grub command"
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    line: 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX console=tty0 console=ttyS0,115200n8 fips=1 boot=/dev/vda1"'
+
+- name: "Rebuild the grub file"
+  shell: grub2-mkconfig -o /boot/grub2/grub.cfg

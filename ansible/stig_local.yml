@@ -1,0 +1,6 @@
+---
+- name: "Run STIG role"
+  hosts: default
+  become: true
+  roles:
+    - RHEL7-STIG

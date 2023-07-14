@@ -1,0 +1,30 @@
+---
+- name: "Enable acpid service"
+  service:
+    name: "acpid"
+    enabled: true
+
+- name: "Enable cloud-final service"
+  service:
+    name: "cloud-final"
+    enabled: true
+
+- name: "Remove UUID from eth0 interface"
+  lineinfile:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    state: absent
+    regexp: '^UUID=.*'
+
+- name: "Disable zeroconf route"
+  lineinfile:
+    path: /etc/sysconfig/network
+    state: present
+    line: 'NOZEROCONF=yes'
+
+- name: "Install cloud-init definition to auto-expand LVM partition"
+  copy:
+    src: lvm-auto-expand.cfg
+    dest: /etc/cloud/cloud.cfg.d/lvm-auto-expand.cfg
+    owner: root
+    group: root
+    mode: 0644

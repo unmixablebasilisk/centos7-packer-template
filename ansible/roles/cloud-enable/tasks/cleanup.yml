@@ -1,0 +1,9 @@
+---
+
+- name: "Cleanup unnecessary files"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /root/anaconda-ks.cfg
+    - /root/original-ks.cfg

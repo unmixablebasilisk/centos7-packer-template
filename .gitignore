@@ -1,0 +1,4 @@
+__pycache__/
+packer_cache/
+output-kvm/
+packer.log*
