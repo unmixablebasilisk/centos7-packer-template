@@ -1,7 +1,7 @@
-# STIG-Image-Build
-Packer-based build files for creating a STIGed CentOS7 image.
+# CentOS 7 STIG Packer Build
+Packer-based build files for creating a STIGed CentOS 7 image.
 
-# CI
+# CI Pipeline
 A docker image is built used contains the neccessary libraries such as Packer, Qemu and OpenStack-cli. The build executes inside of a Docker container that will be spun up on a GitLab CI runner (also running in a Docker container).
 
 # Packer template logic
